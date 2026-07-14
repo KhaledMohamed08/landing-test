@@ -1,0 +1,113 @@
+---
+/**
+ * CustomCursor.astro
+ * ------------------------------------------------------------------
+ * A 6px champagne dot followed by a lagging outer ring with smooth
+ * GSAP physics. Over `.interactive-card` or buttons, the ring expands and
+ * reveals a tiny localized "Explore" label.
+ *
+ * Disabled entirely below 1024px via `gsap.matchMedia()` to avoid touch
+ * conflicts on mobile / tablet.
+ */
+import { siteConfig } from '../data/siteConfig';
+import { t } from '../i18n';
+const cursorLabel = t(siteConfig.contactSection.heroCtaExplore);
+---
+
+<!-- The two cursor layers (dot + ring). Hidden until JS activates them. -->
+<div
+  data-cursor-dot
+  aria-hidden="true"
+  class="opacity-0 h-1.5 w-1.5 rounded-full bg-brand-accent will-change-transform"
+></div>
+<div
+  data-cursor-ring
+  aria-hidden="true"
+  class="opacity-0 h-10 w-10 rounded-full border border-brand-accent/60 will-change-transform flex items-center justify-center"
+>
+  <span
+    data-cursor-label
+    class="font-heading text-[10px] text-brand-accent opacity-0 scale-0 transition-opacity duration-300 whitespace-nowrap"
+  >{cursorLabel}</span>
+</div>
+
+<script>
+  // Cursor logic only runs in the browser and only on fine pointer devices.
+  const initCursor = () => {
+    const gsap = (window as any).gsap;
+    if (!gsap) return;
+
+    const mm = gsap.matchMedia();
+
+    // Desktop only — fine pointers & >= 1024px wide.
+    mm.add(
+      {
+        isDesktop: '(min-width: 1024px) and (pointer: fine)',
+      },
+      (ctx: { conditions?: { isDesktop: boolean } }) => {
+        const { isDesktop } = ctx.conditions ?? {};
+        if (!isDesktop) return;
+
+        const dot = document.querySelector<HTMLElement>('[data-cursor-dot]')!;
+        const ring = document.querySelector<HTMLElement>('[data-cursor-ring]')!;
+        const label = ring.querySelector<HTMLElement>('[data-cursor-label]')!;
+
+        document.body.classList.add('custom-cursor-active');
+
+        // Quick-set initial positions so nothing flashes at (0,0).
+        gsap.set([dot, ring], { xPercent: -50, yPercent: -50, opacity: 1 });
+
+        // The ring plays "catch-up" with a quickTo spring.
+        const xToRing = gsap.quickTo(ring, 'x', { duration: 0.45, ease: 'power3' });
+        const yToRing = gsap.quickTo(ring, 'y', { duration: 0.45, ease: 'power3' });
+        const xToDot = gsap.quickTo(dot, 'x', { duration: 0.12, ease: 'power3' });
+        const yToDot = gsap.quickTo(dot, 'y', { duration: 0.12, ease: 'power3' });
+
+        const onMove = (e: MouseEvent) => {
+          xToRing(e.clientX); yToRing(e.clientY);
+          xToDot(e.clientX); yToDot(e.clientY);
+        };
+        window.addEventListener('mousemove', onMove);
+
+        // Hover expansion over interactive elements.
+        const expand = () => {
+          gsap.to(ring, { scale: 1.8, borderColor: 'var(--color-accent)', duration: 0.3 });
+          gsap.to(label, { opacity: 1, scale: 1, duration: 0.25 });
+        };
+        const collapse = () => {
+          gsap.to(ring, { scale: 1, borderColor: 'rgba(212,197,185,0.6)', duration: 0.3 });
+          gsap.to(label, { opacity: 0, scale: 0, duration: 0.25 });
+        };
+
+        const interactive = document.querySelectorAll(
+          '.interactive-card, a, button, .magnetic',
+        );
+        interactive.forEach((el) => {
+          el.addEventListener('mouseenter', expand);
+          el.addEventListener('mouseleave', collapse);
+        });
+
+        // Hide when the cursor leaves the window entirely.
+        const onHide = () => gsap.to([dot, ring], { opacity: 0, duration: 0.2 });
+        const onShow = () => gsap.to([dot, ring], { opacity: 1, duration: 0.2 });
+        document.addEventListener('mouseleave', onHide);
+        document.addEventListener('mouseenter', onShow);
+
+        // Cleanup when matchMedia reverts below 1024px.
+        return () => {
+          document.body.classList.remove('custom-cursor-active');
+          window.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseleave', onHide);
+          document.removeEventListener('mouseenter', onShow);
+          interactive.forEach((el) => {
+            el.removeEventListener('mouseenter', expand);
+            el.removeEventListener('mouseleave', collapse);
+          });
+        };
+      },
+    );
+  };
+
+  if ((window as any).gsapLoaded) initCursor();
+  else window.addEventListener('gsap:ready', initCursor, { once: true });
+</script>

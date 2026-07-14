@@ -1,0 +1,77 @@
+---
+/**
+ * Root layout — owns <head>, fonts, global styles, and the shared GSAP
+ * plugin registration. RTL is enforced document-wide for the Arabic site.
+ */
+import '../styles/global.css';
+import { siteConfig } from '../data/siteConfig';
+import { t, htmlLang, dir, LOCALE } from '../i18n';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const title = Astro.props.title ?? t(siteConfig.meta.title);
+const description = Astro.props.description ?? t(siteConfig.meta.description);
+const htmlAttrs = {
+  lang: htmlLang,
+  dir,
+  'data-locale': LOCALE,
+};
+---
+
+<!doctype html>
+<html {...htmlAttrs}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    <!-- Theme color ties the browser chrome to the obsidian surface. -->
+    <meta name="theme-color" content="#0B0C10" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+
+    <!-- Critical preconnect for any remote assets you may swap in later. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+
+    <!-- Prevent FOUC for the custom cursor paint. -->
+    <style is:global>
+      [data-cursor-dot],
+      [data-cursor-ring] { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999; }
+    </style>
+
+    </head>
+  <body class="bg-brand-bg text-brand-text antialiased">
+    <slot />
+
+    <!--
+      GSAP core + ScrollTrigger, registered exactly once at the document level.
+      Astro bundles & tree-shakes this <script>; it runs only in the browser,
+      so SSG is never exposed to `window` / `document`.
+    -->
+    <script>
+      import { gsap } from 'gsap';
+      import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      // Expose the shared instance so every component's <script> can attach
+      // to the same engine without re-importing / re-registering plugins.
+      window.gsap = gsap;
+      window.ScrollTrigger = ScrollTrigger;
+      window.gsapLoaded = true;
+      // Mirror the active locale (already on <html data-locale>) onto window
+      // so RTL/LTR-aware client scripts can read it cheaply.
+      window.__NASEEM_LOCALE__ = document.documentElement.dataset.locale || 'en';
+      window.dispatchEvent(new CustomEvent('gsap:ready'));
+    </script>
+  </body>
+</html>

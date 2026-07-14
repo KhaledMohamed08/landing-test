@@ -1,0 +1,184 @@
+---
+/**
+ * HorizontalProjects.astro
+ * ------------------------------------------------------------------
+ * Pins the screen vertically with ScrollTrigger and translates the gallery
+ * container horizontally (track = containerWidth - viewportWidth).
+ *
+ * On screens < 1024px, `gsap.matchMedia()` reverts the pin and the gallery
+ * becomes a native horizontal swipe carousel (overflow-x: auto + snap).
+ *
+ * Scroll direction follows the writing direction:
+ *   - LTR (en): translate left  (negative x) — reveals rightward overflow.
+ *   - RTL (ar): translate right (positive x) — reveals leftward overflow.
+ *
+ * Each card scales-105 on hover while a thin golden blueprint grid overlays
+ * to simulate an architectural sketch draft.
+ *
+ * Project data is 100% driven by `projects.ts` — UI has no hardcode.
+ */
+import { projects, statusLabel } from '../data/projects';
+import { siteConfig } from '../data/siteConfig';
+import { t } from '../i18n';
+
+const ps = siteConfig.projectsSection;
+---
+
+<section id="projects" class="relative bg-brand-surface">
+  <!-- Desktop section header (sits above the pinned track) -->
+  <div class="px-6 sm:px-8 lg:px-14 pt-24 lg:pt-32 max-w-screen-2xl mx-auto">
+    <div class="mb-12 lg:mb-20 flex items-center gap-4">
+      <span class="h-px w-12 bg-brand-accent"></span>
+      <p class="font-body text-xs tracking-[0.3em] text-brand-accent uppercase">{t(ps.eyebrow)}</p>
+    </div>
+    <h2 class="font-heading text-3xl sm:text-4xl lg:text-6xl text-brand-text max-w-3xl">
+      {t(ps.heading)}<br />
+      <span class="text-brand-muted">{t(ps.headingSub)}</span>
+    </h2>
+  </div>
+
+  <!-- ============================================================
+       HORIZONTAL TRACK
+       – Desktop: GSAP-driven translateX inside a pinned viewport.
+       – Mobile : overflow-x swipe carousel + scroll snap.
+       ============================================================ -->
+  <div
+    data-projects-wrap
+    class="relative"
+  >
+    <div
+      data-projects-viewport
+      class="lg:overflow-hidden lg:h-[80vh] lg:flex lg:items-center overflow-x-auto snap-x snap-mandatory lg:snap-none pb-10 lg:pb-0"
+    >
+      <div
+        data-projects-track
+        class="flex gap-6 lg:gap-12 px-6 sm:px-8 lg:px-14 will-change-transform"
+      >
+        {projects.map((project) => (
+          <article
+            data-project-card
+            class="interactive-card group relative shrink-0 snap-center overflow-hidden rounded-2xl border border-brand-accent/10 bg-brand-bg will-change-transform"
+            style="width: min(85vw, 380px);"
+          >
+            <!-- Image stage -->
+            <div class="relative aspect-[3/4] overflow-hidden">
+              <img
+                src={project.image}
+                alt={t(project.alt)}
+                loading="lazy"
+                decoding="async"
+                width="380"
+                height="507"
+                class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              />
+              <!-- Blueprint sketch grid overlay -->
+              <div
+                class="blueprint-grid absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 mix-blend-overlay"
+                aria-hidden="true"
+              ></div>
+              <!-- Bottom gradient + status badge -->
+              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-brand-bg via-brand-bg/70 to-transparent p-5 pt-16">
+                <span
+                  class:list={[
+                    'inline-block rounded-full border px-3 py-1 text-[11px] tracking-wider font-body',
+                    project.status === 'completed' && 'border-brand-accent/40 text-brand-accent',
+                    project.status === 'ongoing' && 'border-brand-text/30 text-brand-text',
+                    project.status === 'upcoming' && 'border-brand-muted/30 text-brand-muted',
+                  ]}
+                >
+                  {t(statusLabel[project.status])}
+                </span>
+              </div>
+            </div>
+
+            <!-- Text block -->
+            <div class="p-5 sm:p-6">
+              <h3 class="font-heading text-xl sm:text-2xl text-brand-text mb-1">
+                {t(project.title)}
+              </h3>
+              <p class="font-body text-sm text-brand-muted mb-3">
+                {t(project.location)}
+              </p>
+              <p class="font-body text-sm leading-relaxed text-brand-muted/90 mb-4 line-clamp-3">
+                {t(project.description)}
+              </p>
+              {project.meta && (
+                <p class="font-body text-xs tracking-wider text-brand-accent/80 uppercase">
+                  {t(project.meta)}
+                </p>
+              )}
+            </div>
+          </article>
+        ))}
+
+        <!-- Tail marker -->
+        <div class="shrink-0 flex items-center justify-center text-brand-muted font-body text-sm px-6 lg:px-12" style="min-width: 30vw;">
+          <span>{t(ps.endMarker)}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Desktop scroll hint -->
+  <p
+    data-projects-hint
+    class="hidden lg:block px-6 sm:px-8 lg:px-14 pb-24 pt-10 text-sm text-brand-muted font-body max-w-screen-2xl mx-auto"
+  >
+    {t(ps.scrollHint)}
+  </p>
+</section>
+
+<script>
+  const initProjects = () => {
+    const gsap = (window as any).gsap;
+    const ScrollTrigger = (window as any).ScrollTrigger;
+    if (!gsap || !ScrollTrigger) return;
+
+    // Resolve the active writing direction on the client.
+    const rtl = (window as any).__NASEEM_LOCALE__ === 'ar';
+    const dir = rtl ? 1 : -1; // +1 translate right (RTL), -1 translate left (LTR)
+
+    const mm = gsap.matchMedia();
+
+    mm.add('(min-width: 1024px)', () => {
+      const viewport = document.querySelector<HTMLElement>('[data-projects-viewport]');
+      const track = document.querySelector<HTMLElement>('[data-projects-track]');
+      const hint = document.querySelector<HTMLElement>('[data-projects-hint]');
+      if (!viewport || !track) return;
+
+      // Distance the track must travel horizontally.
+      const getScrollAmount = () => track.scrollWidth - window.innerWidth;
+
+      const tween = gsap.to(track, {
+        x: () => dir * getScrollAmount(),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: viewport,
+          start: 'top 20%',
+          end: () => `+=${getScrollAmount()}`,
+          pin: true,
+          scrub: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      const hintTween = gsap.to(hint, {
+        opacity: 0,
+        scrollTrigger: {
+          trigger: viewport,
+          start: 'top 20%',
+          toggleActions: 'play none none reverse',
+        },
+      });
+
+      return () => {
+        tween.kill();
+        hintTween.kill();
+        ScrollTrigger.refresh();
+      };
+    });
+  };
+
+  if ((window as any).gsapLoaded) initProjects();
+  else window.addEventListener('gsap:ready', initProjects, { once: true });
+</script>

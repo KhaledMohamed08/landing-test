@@ -1,0 +1,114 @@
+/* Latin subsets ship for the English-first site. Arabic subsets are a
+   one-line switch away (see i18n note in src/i18n/index.ts). */
+@import '@fontsource/ibm-plex-sans-arabic/latin.css';
+@import '@fontsource/readex-pro/latin.css';
+@import 'tailwindcss';
+
+/* ============================================================
+   DYNAMIC THEMING SYSTEM
+   Swap the values below to re-skin the entire site instantly.
+   ============================================================ */
+:root {
+  --color-bg-primary: #0B0C10;      /* Obsidian background */
+  --color-bg-secondary: #1F232B;    /* Slate / Concrete surface */
+  --color-text-primary: #F4F4F6;    /* Ivory White */
+  --color-text-muted: #A0A5B5;      /* Muted text */
+  --color-accent: #D4C5B9;          /* Champagne Gold */
+  --color-accent-hover: #BCA898;    /* Darker Champagne */
+}
+
+/* Tailwind v4 — expose CSS variables as theme tokens. */
+@theme {
+  --color-brand-bg: var(--color-bg-primary);
+  --color-brand-surface: var(--color-bg-secondary);
+  --color-brand-text: var(--color-text-primary);
+  --color-brand-muted: var(--color-text-muted);
+  --color-brand-accent: var(--color-accent);
+  --color-brand-accent-hover: var(--color-accent-hover);
+
+  --font-heading: 'IBM Plex Sans Arabic', sans-serif;
+  --font-body: 'Readex Pro', sans-serif;
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-bg-primary);
+}
+
+/* Minimal scrollbar styled in gold. */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--color-bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--color-bg-secondary); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
+
+/* Hide native cursor only on pointer-fine desktops where custom cursor runs. */
+@media (pointer: fine) {
+  body.custom-cursor-active,
+  body.custom-cursor-active * { cursor: none !important; }
+}
+
+/* ============================================================
+   REUSABLE UTILITIES
+   ============================================================ */
+
+/* Masked text reveal — line rises from bottom. */
+.text-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+.text-mask > span {
+  display: inline-block;
+  transform: translateY(110%);
+  will-change: transform;
+}
+
+/* Architectural blueprint grid overlay (project cards). */
+.blueprint-grid {
+  background-image:
+    linear-gradient(to right, rgba(212, 197, 185, 0.35) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(212, 197, 185, 0.35) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Hollow-stroke numbers used in the timeline. */
+.hollow-number {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  -webkit-text-stroke: 2px var(--color-accent);
+  color: transparent;
+  transition: -webkit-text-stroke-color 0.6s ease, color 0.6s ease;
+}
+.hollow-number.is-active {
+  color: var(--color-accent);
+  -webkit-text-stroke-color: transparent;
+}
+
+/* Respect reduced-motion preferences. */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  html { scroll-behavior: auto; }
+}

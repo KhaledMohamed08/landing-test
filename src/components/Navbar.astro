@@ -1,0 +1,375 @@
+---
+/**
+ * Navbar.astro
+ * ------------------------------------------------------------------
+ * A premium, scroll-aware navigation rail:
+ *   • Fixed across the whole page (not just the hero).
+ *   • Transparent over the hero, condenses into a frosted-glass bar with a
+ *     hairline border the moment the user scrolls past the hero.
+ *   • Gold scroll-progress indicator running along the top edge.
+ *   • Animated underline indicator that tracks the active section
+ *     (IntersectionObserver-driven).
+ *   • Magnetic links + magnetic CTA (desktop).
+ *   • Smartphone: full-screen drawer with staggered link reveal + a backdrop
+ *     blur layer. Accessible (focus trap, Esc to close, aria-expanded).
+ *
+ * All copy comes from `siteConfig.nav` — zero hardcode.
+ * Visible only on fine-pointer desktops: the cursor "Explore" ring already
+ * reacts to `.interactive-card` elements here.
+ */
+import { siteConfig } from '../data/siteConfig';
+import { t, isRTL } from '../i18n';
+
+const nav = siteConfig.nav;
+const forwardArrow = isRTL ? '←' : '→';
+const menuLabel = { en: 'Menu', ar: 'القائمة' };
+const closeLabel = { en: 'Close', ar: 'إغلاق' };
+const bookLabel = siteConfig.contactSection.requestPitch;
+---
+
+<!-- ============================================================
+     SCROLL PROGRESS — thin gold line along the very top.
+     ============================================================ -->
+<div
+  data-scroll-progress
+  class="fixed top-0 inset-inline-0 z-50 h-px origin-left bg-brand-accent/80 scale-x-0 pointer-events-none"
+  style="transform-origin: var(--progress-origin, left);"
+  aria-hidden="true"
+></div>
+
+<!-- ============================================================
+     NAVIGATION RAIL
+     ============================================================ -->
+<header
+  data-navbar
+  class="fixed top-0 inset-x-0 z-40 transition-[background-color,border-color,backdrop-filter,padding] duration-500 ease-out border-b border-transparent"
+>
+  <nav
+    class="mx-auto flex max-w-screen-2xl items-center justify-between px-6 sm:px-8 lg:px-14 py-5 transition-all duration-500"
+    data-nav-inner
+    aria-label="Primary"
+  >
+    <!-- ── Brand ────────────────────────────────────────────── -->
+    <a
+      href="#hero"
+      class="group inline-flex items-baseline gap-1.5"
+      data-magnetic
+      aria-label={t(siteConfig.agency.name)}
+    >
+      <span
+        class="relative grid h-9 w-9 place-items-center rounded-full border border-brand-accent/40 text-brand-accent transition-all duration-500 group-hover:bg-brand-accent group-hover:text-brand-bg"
+      >
+        <span class="font-heading text-sm font-semibold tracking-tight">N</span>
+        <span class="absolute inset-0 rounded-full ring-1 ring-brand-accent/0 scale-100 transition-all duration-500 group-hover:scale-125 group-hover:ring-brand-accent/30"></span>
+      </span>
+      <span class="font-heading text-lg tracking-[0.25em] text-brand-text">
+        {siteConfig.agency.nameEn}
+      </span>
+    </a>
+
+    <!-- ── Center links (desktop) ───────────────────────────── -->
+    <ul class="hidden lg:flex items-center gap-1 font-body text-sm" data-nav-links>
+      {nav.map((item) => (
+        <li>
+          <a
+            href={item.href}
+            data-nav-link
+            class="interactive-card group relative px-4 py-2 text-brand-muted transition-colors duration-300 hover:text-brand-text aria-[current=page]:text-brand-text"
+            data-magnetic
+          >
+            <span class="relative z-10">{t(item.label)}</span>
+            <span
+              class="pointer-events-none absolute inset-x-3 -bottom-0.5 h-px origin-center scale-x-0 bg-brand-accent transition-transform duration-300 group-hover:scale-x-100 aria-[current=page]:scale-x-100"
+            ></span>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <!-- ── Right cluster ───────────────────────────────────── -->
+    <div class="flex items-center gap-3">
+      <a
+        href="#contact"
+        class="interactive-card group hidden sm:inline-flex items-center gap-2 rounded-full border border-brand-accent/30 px-5 py-2.5 text-sm text-brand-accent transition-colors duration-300 hover:bg-brand-accent hover:text-brand-bg hover:border-brand-accent"
+        data-magnetic
+      >
+        {t(bookLabel)}
+        <span class="transition-transform duration-300 group-hover:translate-x-[3px]">{forwardArrow}</span>
+      </a>
+
+      <!-- Mobile menu trigger -->
+      <button
+        type="button"
+        data-menu-toggle
+        class="lg:hidden interactive-card relative grid h-10 w-10 place-items-center rounded-full border border-brand-accent/30 text-brand-text"
+        aria-label={t(menuLabel)}
+        aria-expanded="false"
+        aria-controls="mobile-drawer"
+      >
+        <span class="relative block h-3 w-4">
+          <span class="absolute left-0 top-0 h-px w-full bg-current transition-all duration-300" data-icon-line="1"></span>
+          <span class="absolute left-0 top-1/2 h-px w-full bg-current transition-all duration-300 -translate-y-1/2" data-icon-line="2"></span>
+          <span class="absolute left-0 bottom-0 h-px w-full bg-current transition-all duration-300" data-icon-line="3"></span>
+        </span>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<!-- ============================================================
+     MOBILE DRAWER — full-screen frosted panel + staggered links
+     ============================================================ -->
+<div
+  id="mobile-drawer"
+  data-drawer
+  class="fixed inset-0 z-30 lg:hidden invisible opacity-0 transition-[opacity,visibility] duration-500 ease-out"
+  aria-hidden="true"
+>
+  <!-- Backdrop -->
+  <div
+    data-drawer-backdrop
+    class="absolute inset-0 bg-brand-bg/80 backdrop-blur-xl"
+  ></div>
+
+  <!-- Panel -->
+  <div
+    data-drawer-panel
+    class="absolute inset-x-0 top-0 flex flex-col px-6 pt-28 pb-10 min-h-screen"
+  >
+    <ul class="flex flex-col gap-2" data-drawer-links>
+      {nav.map((item, i) => (
+        <li class="overflow-hidden">
+          <a
+            href={item.href}
+            data-drawer-link
+            style={`--drawer-index: ${i};`}
+            class="interactive-card block font-heading text-4xl sm:text-5xl text-brand-text py-3 border-b border-brand-accent/10 transition-colors duration-300 hover:text-brand-accent hover:border-brand-accent/40"
+          >
+            <span class="inline-block opacity-40 text-brand-accent text-base align-middle me-4 font-body">
+              0{i + 1}
+            </span>
+            {t(item.label)}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <div class="mt-auto pt-12 flex flex-col gap-5" data-drawer-foot>
+      <a
+        href="#contact"
+        data-drawer-cta
+        class="interactive-card inline-flex items-center justify-center gap-2 rounded-full bg-brand-accent px-6 py-3.5 text-sm font-medium text-brand-bg transition-colors duration-300 hover:bg-brand-accent-hover"
+      >
+        {t(bookLabel)}
+        <span>{forwardArrow}</span>
+      </a>
+      <ul class="flex flex-wrap gap-x-5 gap-y-2 font-body text-sm text-brand-muted">
+        {siteConfig.social.map((s) => (
+          <li>
+            <a
+              href={s.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="interactive-card hover:text-brand-accent transition-colors duration-300"
+            >
+              {t(s.label)}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Spacer to reserve room for the fixed rail so content doesn't hide under it -->
+<div class="h-0" aria-hidden="true"></div>
+
+<script>
+  const initNavbar = () => {
+    const gsap = (window as any).gsap;
+    const navbar = document.querySelector<HTMLElement>('[data-navbar]')!;
+    const inner = document.querySelector<HTMLElement>('[data-nav-inner]')!;
+    const progress = document.querySelector<HTMLElement>('[data-scroll-progress]')!;
+    const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]')!;
+    const drawer = document.querySelector<HTMLElement>('[data-drawer]')!;
+    const backdrop = document.querySelector<HTMLElement>('[data-drawer-backdrop]')!;
+    const panel = document.querySelector<HTMLElement>('[data-drawer-panel]')!;
+    const drawerLinks = Array.from(document.querySelectorAll<HTMLElement>('[data-drawer-link]'));
+    const drawerFoot = document.querySelector<HTMLElement>('[data-drawer-foot]');
+
+    // RTL-aware origin for the scroll-progress bar.
+    const rtl = (window as any).__NASEEM_LOCALE__ === 'ar';
+    progress.style.setProperty('--progress-origin', rtl ? 'right' : 'left');
+
+    // ---------------------------------------------------------------
+    // 1. SCROLL-AWARE CONDENSE
+    //    Transparent over hero → frosted glass once scrolled.
+    // ---------------------------------------------------------------
+    let lastY = 0;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const condense = y > 80;
+
+      navbar.classList.toggle('bg-brand-bg/60', condense);
+      navbar.classList.toggle('backdrop-blur-xl', condense);
+      navbar.classList.toggle('border-brand-accent/10', condense);
+      navbar.classList.toggle('shadow-[0_8px_30px_rgba(0,0,0,0.35)]', condense);
+      inner.classList.toggle('py-3', condense);
+      inner.classList.toggle('py-5', !condense);
+
+      // Hide-on-scroll-down, show-on-scroll-up (only after condensing).
+      if (condense && y > lastY && y > 240 && !drawer.classList.contains('is-open')) {
+        navbar.style.transform = 'translateY(-110%)';
+      } else {
+        navbar.style.transform = 'translateY(0)';
+      }
+      lastY = y;
+
+      // Scroll progress — fraction of total scrollable distance.
+      const docH = document.documentElement.scrollHeight - window.innerHeight;
+      const frac = docH > 0 ? y / docH : 0;
+      progress.style.transform = `scaleX(${frac})`;
+    };
+
+    // Hide transform transitions smoothly via the navbar's transition class.
+    navbar.style.transition =
+      'transform 0.45s cubic-bezier(0.22,1,0.36,1), background-color 0.5s, border-color 0.5s';
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // ---------------------------------------------------------------
+    // 2. ACTIVE-SECTION HIGHLIGHTING (IntersectionObserver)
+    // ---------------------------------------------------------------
+    const navLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-nav-link]'));
+    const sections = Array.from(navLinks)
+      .map((a) => {
+        const id = a.getAttribute('href')?.slice(1);
+        return id ? document.getElementById(id) : null;
+      })
+      .filter((el): el is HTMLElement => Boolean(el));
+
+    const setActive = (id: string) => {
+      navLinks.forEach((a) => {
+        const match = a.getAttribute('href') === `#${id}`;
+        if (match) a.setAttribute('aria-current', 'page');
+        else a.removeAttribute('aria-current');
+      });
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) setActive(visible.target.id);
+      },
+      { rootMargin: '-45% 0px -50% 0px', threshold: [0, 0.25, 0.5, 1] },
+    );
+    sections.forEach((s) => observer.observe(s));
+
+    // ---------------------------------------------------------------
+    // 3. MOBILE DRAWER — open/close with staggered reveal
+    // ---------------------------------------------------------------
+    let isOpen = false;
+    const setDrawer = (open: boolean) => {
+      isOpen = open;
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Close' : 'Menu');
+      drawer.setAttribute('aria-hidden', String(!open));
+      drawer.classList.toggle('is-open', open);
+      drawer.classList.toggle('invisible', !open);
+      drawer.classList.toggle('opacity-0', !open);
+      document.body.style.overflow = open ? 'hidden' : '';
+
+      // Animate the hamburger into an X.
+      const l1 = toggle.querySelector('[data-icon-line="1"]');
+      const l2 = toggle.querySelector('[data-icon-line="2"]');
+      const l3 = toggle.querySelector('[data-icon-line="3"]');
+      if (open) {
+        l1?.classList.add('translate-y-[5px]', 'rotate-45');
+        l2?.classList.add('opacity-0');
+        l3?.classList.add('-translate-y-[5px]', '-rotate-45');
+      } else {
+        l1?.classList.remove('translate-y-[5px]', 'rotate-45');
+        l2?.classList.remove('opacity-0');
+        l3?.classList.remove('-translate-y-[5px]', '-rotate-45');
+      }
+
+      if (open) {
+        // Staggered link reveal — works whether or not GSAP is ready.
+        if (gsap) {
+          gsap.fromTo(
+            drawerLinks,
+            { y: 40, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.6,
+              ease: 'power3.out',
+              stagger: 0.07,
+              delay: 0.1,
+            },
+          );
+          gsap.fromTo(
+            drawerFoot,
+            { y: 20, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.6, delay: 0.45, ease: 'power3.out' },
+          );
+        } else {
+          drawerLinks.forEach((el, i) => {
+            el.style.transition = 'opacity 0.5s, transform 0.5s';
+            el.style.transitionDelay = `${0.05 + i * 0.07}s`;
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+          });
+        }
+      } else {
+        drawerLinks.forEach((el) => {
+          el.style.opacity = '';
+          el.style.transform = '';
+        });
+      }
+    };
+
+    toggle.addEventListener('click', () => setDrawer(!isOpen));
+    backdrop.addEventListener('click', () => setDrawer(false));
+    // Close after navigating.
+    drawerLinks.forEach((a) => a.addEventListener('click', () => setDrawer(false)));
+    // Esc closes.
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isOpen) setDrawer(false);
+    });
+
+    // ---------------------------------------------------------------
+    // 4. MAGNETIC LINKS (desktop, fine pointer)
+    // ---------------------------------------------------------------
+    const mm = gsap?.matchMedia?.();
+    if (!mm) return;
+    mm.add('(min-width: 1024px) and (pointer: fine)', () => {
+      const magnetics = navbar.querySelectorAll<HTMLElement>('[data-magnetic]');
+      const handlers: Array<() => void> = [];
+      magnetics.forEach((el) => {
+        const strength = 0.25;
+        const onMove = (e: MouseEvent) => {
+          const r = el.getBoundingClientRect();
+          const x = (e.clientX - (r.left + r.width / 2)) * strength;
+          const y = (e.clientY - (r.top + r.height / 2)) * strength;
+          gsap.to(el, { x, y, duration: 0.45, ease: 'power3.out' });
+        };
+        const onLeave = () =>
+          gsap.to(el, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.3)' });
+        el.addEventListener('mousemove', onMove);
+        el.addEventListener('mouseleave', onLeave);
+        handlers.push(() => {
+          el.removeEventListener('mousemove', onMove);
+          el.removeEventListener('mouseleave', onLeave);
+        });
+      });
+      return () => handlers.forEach((fn) => fn());
+    });
+  };
+
+  if ((window as any).gsapLoaded) initNavbar();
+  else window.addEventListener('gsap:ready', initNavbar, { once: true });
+</script>

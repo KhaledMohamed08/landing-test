@@ -12,6 +12,15 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^7.0.9"
+    "@fontsource/ibm-plex-sans-arabic": "^5.2.9",
+    "@fontsource/readex-pro": "^5.2.11",
+    "@tailwindcss/vite": "^4.3.2",
+    "astro": "^7.0.9",
+    "gsap": "^3.15.0",
+    "tailwindcss": "^4.3.2"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "typescript": "^6.0.3"
   }
 }

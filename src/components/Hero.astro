@@ -1,0 +1,179 @@
+---
+/**
+ * Hero.astro
+ * ------------------------------------------------------------------
+ * Full-screen 100vh section. Muted architectural backdrop (drops back to a
+ * slow CSS gradient animation when /hero.mp4 isn't shipped). A glassmorphic
+ * container parallaxes gently with the mouse on desktop. The headline rises
+ * via a clip-path mask reveal on page load.
+ *
+ * All copy is config-driven (siteConfig) and resolved through `t()`.
+ */
+import { siteConfig } from '../data/siteConfig';
+import { t, isRTL } from '../i18n';
+
+const cta = siteConfig.contactSection;
+// Forward-pointing arrow follows the writing direction.
+const forwardArrow = isRTL ? '←' : '→';
+const heroSub = {
+  en: 'Contemporary architecture that respects its context and inspires its inhabitants — a developer building projects as works of art that tell the story of place.',
+  ar: 'عمارة معاصرة تَحترم موضعها وتُلهم ساكنها — شركة تنمية عقارية تبني المشاريع كقطع فنية تَحكي قصة المكان.',
+};
+const headlineLines = {
+  en: ['We shape brick into', 'a timeless living experience'],
+  ar: ['نُشكّل الطوب إلى', 'تجربة معيشية خالدة'],
+};
+const activeLines = isRTL ? headlineLines.ar : headlineLines.en;
+---
+
+<section
+  id="hero"
+  class="relative h-screen min-h-[640px] w-full overflow-hidden bg-brand-bg"
+>
+  <!-- ============================================================
+       BACKDROP — muted looping video when present, else gradient.
+       ============================================================ -->
+  <div class="absolute inset-0">
+    <video
+      data-hero-video
+      class="absolute inset-0 h-full w-full object-cover opacity-60"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      aria-hidden="true"
+    >
+      <source src="/hero.webm" type="video/webm" />
+      <source src="/hero.mp4" type="video/mp4" />
+    </video>
+    <!-- Always-on fallback gradient ensures no layout shift / flash. -->
+    <div
+      data-hero-fallback
+      class="absolute inset-0 bg-gradient-to-br from-brand-bg via-brand-surface to-brand-bg"
+      style="animation: heroDrift 18s ease-in-out infinite alternate; background-size: 200% 200%;"
+    ></div>
+  </div>
+
+  <!-- Obsidian scrim for legibility -->
+  <div class="absolute inset-0 bg-brand-bg/50"></div>
+
+  <!-- Subtle aurora wash — pure CSS, GPU-cheap, adds depth. -->
+  <div
+    class="pointer-events-none absolute -top-1/4 right-0 h-[60vh] w-[60vh] rounded-full blur-3xl opacity-30 bg-brand-accent/20"
+  ></div>
+
+  <!-- ============================================================
+       GLASSMORPHIC HERO CARD — widened for a more cinematic stage.
+       (Navigation lives in its own Navbar.astro component.)
+       ============================================================ -->
+  <div class="relative z-20 flex h-full items-center justify-center px-6 sm:px-8 lg:px-14">
+    <div
+      data-hero-card
+      class="w-full max-w-5xl rounded-2xl border border-brand-accent/20 bg-brand-bg/40 backdrop-blur-md px-8 py-14 sm:px-14 sm:py-16 lg:px-20 lg:py-20 text-center"
+    >
+      <p class="font-body text-sm tracking-[0.3em] text-brand-accent uppercase mb-6">
+        {siteConfig.agency.nameEn} — {t(siteConfig.agency.tagline)}
+      </p>
+
+      <!-- Masked reveal headline (each line wrapped in .text-mask). -->
+      <h1 class="font-heading text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.15] text-brand-text">
+        <span class="text-mask block"><span>{activeLines[0]}</span></span>
+        <span class="text-mask block mt-2"><span class="text-brand-accent">{activeLines[1]}</span></span>
+      </h1>
+
+      <p class="mt-8 font-body text-base sm:text-lg lg:text-xl text-brand-muted leading-relaxed max-w-2xl mx-auto">
+        {isRTL ? heroSub.ar : heroSub.en}
+      </p>
+
+      <div class="mt-10 flex flex-wrap items-center justify-center gap-5">
+        <a
+          href="#projects"
+          class="interactive-card group inline-flex items-center gap-3 rounded-full bg-brand-accent px-7 py-3 text-sm font-medium text-brand-bg transition-colors duration-300 hover:bg-brand-accent-hover"
+          data-magnetic
+        >
+          {t(cta.ctaPrimary)}
+          <span class="transition-transform duration-300 group-hover:translate-x-[4px]">{forwardArrow}</span>
+        </a>
+        <a
+          href="#philosophy"
+          class="interactive-card inline-flex items-center rounded-full border border-brand-accent/30 px-7 py-3 text-sm text-brand-text transition-colors duration-300 hover:border-brand-accent"
+          data-magnetic
+        >
+          {t(cta.ctaSecondary)}
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll cue -->
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 text-brand-muted">
+    <span class="font-body text-xs tracking-widest">{t(cta.heroScrollCue)}</span>
+    <span class="h-10 w-px bg-brand-accent/40 overflow-hidden relative">
+      <span class="absolute top-0 inset-x-0 h-4 bg-brand-accent" data-scroll-cue></span>
+    </span>
+  </div>
+</section>
+
+<style>
+  @keyframes heroDrift {
+    0%   { background-position: 0% 0%; }
+    100% { background-position: 100% 100%; }
+  }
+</style>
+
+<script>
+  const initHero = () => {
+    const gsap = (window as any).gsap;
+    if (!gsap) return;
+
+    // Hide the synchronous fallback if the video actually starts playing.
+    const video = document.querySelector<HTMLVideoElement>('[data-hero-video]');
+    const fallback = document.querySelector<HTMLElement>('[data-hero-fallback]');
+    if (video) {
+      const onReady = () => {
+        if (video.readyState >= 2 && video.currentTime !== video.duration) {
+          gsap.to(fallback, { opacity: 0, duration: 0.8, delay: 0.2 });
+        }
+      };
+      video.addEventListener('playing', onReady, { once: true });
+    }
+
+    // Masked text reveal — stagger the inner spans up from 110%.
+    gsap.to('[data-hero-card] .text-mask > span', {
+      y: '0%',
+      duration: 1.1,
+      ease: 'power4.out',
+      stagger: 0.15,
+      delay: 0.25,
+    });
+
+    gsap.from('[data-hero-card] p, [data-hero-card] a', {
+      y: 18,
+      opacity: 0,
+      duration: 0.8,
+      ease: 'power3.out',
+      stagger: 0.08,
+      delay: 0.7,
+    });
+
+    // Scroll cue — infinite downward sweep.
+    gsap.to('[data-scroll-cue]', { y: 40, duration: 1.2, repeat: -1, ease: 'none' });
+
+    // Desktop-only mouse parallax for the glass card.
+    const mm = gsap.matchMedia();
+    mm.add('(min-width: 1024px) and (pointer: fine)', () => {
+      const card = document.querySelector('[data-hero-card]');
+      const onMove = (e: MouseEvent) => {
+        const cx = (e.clientX / window.innerWidth - 0.5) * 2;
+        const cy = (e.clientY / window.innerHeight - 0.5) * 2;
+        gsap.to(card, { x: cx * 18, y: cy * 12, duration: 0.8, ease: 'power2.out' });
+      };
+      window.addEventListener('mousemove', onMove);
+      return () => window.removeEventListener('mousemove', onMove);
+    });
+  };
+
+  if ((window as any).gsapLoaded) initHero();
+  else window.addEventListener('gsap:ready', initHero, { once: true });
+</script>

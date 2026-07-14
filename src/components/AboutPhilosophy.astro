@@ -1,0 +1,86 @@
+---
+/**
+ * AboutPhilosophy.astro
+ * ------------------------------------------------------------------
+ * Two-column layout. Left column sticks & carries the developer's core
+ * philosophy copy. Right column hosts giant hollow-stroke phase numbers
+ * (driven by the InteractiveTimeline behaviour, kept here as the static
+ * scaffolding).
+ *
+ * Text & copy are 100% sourced from siteConfig through `t()` — nothing is
+ * hardcoded.
+ */
+import { siteConfig } from '../data/siteConfig';
+import { t } from '../i18n';
+---
+
+<section id="philosophy" class="relative bg-brand-bg py-24 sm:py-32 lg:py-40 px-6 sm:px-8 lg:px-14">
+  <!-- Section eyebrow / divider -->
+  <div class="mb-16 lg:mb-24 flex items-center gap-4">
+    <span class="h-px w-12 bg-brand-accent"></span>
+    <p class="font-body text-xs tracking-[0.3em] text-brand-accent uppercase">
+      {t(siteConfig.philosophy.eyebrow)}
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+    <!-- ============================================================
+         LEFT — sticky philosophy column
+         ============================================================ -->
+    <div class="lg:sticky lg:top-28 lg:self-start">
+      <h2 class="font-heading text-3xl sm:text-4xl lg:text-5xl leading-snug text-brand-text max-w-md">
+        {t(siteConfig.philosophy.heading)}
+      </h2>
+      <p class="mt-8 font-body text-base sm:text-lg leading-relaxed text-brand-muted max-w-md">
+        {t(siteConfig.philosophy.body)}
+      </p>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        {siteConfig.agency.nameEn && (
+          <span class="rounded-full border border-brand-accent/30 px-4 py-1.5 text-xs text-brand-muted font-body">
+            {siteConfig.agency.nameEn} · {t(siteConfig.agency.name)}
+          </span>
+        )}
+      </div>
+    </div>
+
+    <!-- ============================================================
+         RIGHT — phase numbers feed the InteractiveTimeline behaviour
+         The wrapper id is the bridge the timeline hooks into.
+         ============================================================ -->
+    <div
+      id="timeline"
+      data-timeline-root
+      class="flex flex-col gap-20 lg:gap-32"
+    >
+      {siteConfig.phases.map((phase) => (
+        <article
+          data-phase
+          data-phase-index={phase.index}
+          class="relative interactive-card"
+        >
+          <div class="flex items-start gap-6 lg:gap-10">
+            <!-- Hollow number fills with accent when active -->
+            <span
+              data-phase-number
+              class="hollow-number select-none text-[7rem] sm:text-[10rem] lg:text-[12rem] leading-none -mt-4"
+            >
+              {phase.index}
+            </span>
+            <div
+              data-phase-body
+              class="pt-6 lg:pt-12 opacity-40 transition-opacity duration-500"
+            >
+              <h3 class="font-heading text-2xl sm:text-3xl text-brand-text mb-4">
+                {t(phase.title)}
+              </h3>
+              <p class="font-body text-base sm:text-lg leading-relaxed text-brand-muted max-w-md">
+                {t(phase.description)}
+              </p>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,80 @@
+---
+/**
+ * Footer.astro
+ * ------------------------------------------------------------------
+ * Closing expanse — large agency wordmark, navigation echo, social channels
+ * and legal copy. Every line is sourced from siteConfig through `t()`.
+ */
+import { siteConfig } from '../data/siteConfig';
+import { t } from '../i18n';
+
+const f = siteConfig.footer;
+---
+
+<footer class="relative bg-brand-bg border-t border-brand-accent/10 px-6 sm:px-8 lg:px-14 pt-20 pb-10 overflow-hidden">
+  <!-- Decorative oversized wordmark -->
+  <div
+    aria-hidden="true"
+    class="pointer-events-none select-none absolute -bottom-6 right-0 left-0 text-center font-heading font-semibold leading-none text-brand-text/5 text-[18vw] lg:text-[14vw]"
+  >
+    {siteConfig.agency.nameEn}
+  </div>
+
+  <div class="relative max-w-screen-xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-16 mb-16">
+      <!-- Brand -->
+      <div>
+        <a href="#hero" class="font-heading text-2xl tracking-widest text-brand-text">
+          {t(siteConfig.agency.name)}<span class="text-brand-accent">.</span>
+        </a>
+        <p class="mt-4 font-body text-sm text-brand-muted max-w-xs leading-relaxed">
+          {t(siteConfig.agency.tagline)} — {t(f.taglineLong)}
+        </p>
+      </div>
+
+      <!-- Nav echo -->
+      <nav aria-label="Footer">
+        <p class="font-body text-xs tracking-[0.3em] text-brand-accent uppercase mb-5">{t(f.linksTitle)}</p>
+        <ul class="space-y-3 font-body text-sm text-brand-muted">
+          {siteConfig.nav.map((item) => (
+            <li>
+              <a href={item.href} class="interactive-card hover:text-brand-text transition-colors duration-300">
+                {t(item.label)}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <!-- Contact + social -->
+      <div>
+        <p class="font-body text-xs tracking-[0.3em] text-brand-accent uppercase mb-5">{t(f.contactTitle)}</p>
+        <ul class="space-y-3 font-body text-sm text-brand-muted">
+          <li><a href={`tel:${siteConfig.contact.phone}`} class="interactive-card hover:text-brand-text transition-colors duration-300" dir="ltr">{siteConfig.contact.phoneDisplay}</a></li>
+          <li><a href={`mailto:${siteConfig.contact.email}`} class="interactive-card hover:text-brand-text transition-colors duration-300" dir="ltr">{siteConfig.contact.email}</a></li>
+          <li class="text-brand-muted">{t(siteConfig.contact.address)}</li>
+        </ul>
+
+        <ul class="mt-6 flex flex-wrap gap-x-5 gap-y-2 font-body text-sm">
+          {siteConfig.social.map((s) => (
+            <li>
+              <a
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="interactive-card text-brand-muted hover:text-brand-accent transition-colors duration-300"
+              >
+                {t(s.label)}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-brand-accent/10 pt-6 font-body text-xs text-brand-muted">
+      <p>{t(f.rights)}</p>
+      <p class="text-brand-muted/70">{t(f.credits)}</p>
+    </div>
+  </div>
+</footer>

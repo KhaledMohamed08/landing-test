@@ -1,0 +1,82 @@
+---
+/**
+ * Partners.astro
+ * ------------------------------------------------------------------
+ * Showcase of the design firms / constructors who shape each Naseem project.
+ * Logos are monochrome SVGs (served from /public) with a gentle staggered
+ * fade-in on scroll. Each logo links out to the partner's website.
+ */
+import { partners } from '../data/partners';
+import { siteConfig } from '../data/siteConfig';
+import { t } from '../i18n';
+
+const ps = siteConfig.partnersSection;
+---
+
+<section id="partners" class="bg-brand-bg py-24 sm:py-32 px-6 sm:px-8 lg:px-14">
+  <div class="max-w-screen-2xl mx-auto">
+    <div class="mb-12 lg:mb-16 flex items-center gap-4">
+      <span class="h-px w-12 bg-brand-accent"></span>
+      <p class="font-body text-xs tracking-[0.3em] text-brand-accent uppercase">{t(ps.eyebrow)}</p>
+    </div>
+
+    <h2 class="font-heading text-3xl sm:text-4xl lg:text-5xl text-brand-text mb-14 max-w-xl">
+      {t(ps.heading)}
+    </h2>
+
+    <ul
+      data-partners-grid
+      class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-px bg-brand-accent/10 border border-brand-accent/10 rounded-2xl overflow-hidden"
+    >
+      {partners.map((partner) => (
+        <li class="bg-brand-bg group">
+          <a
+            href={partner.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={partner.name}
+            class="interactive-card flex flex-col items-center justify-center gap-3 p-8 h-44 transition-colors duration-500 hover:bg-brand-surface"
+            data-magnetic
+          >
+            <img
+              src={partner.logo}
+              alt={`${partner.name} logo`}
+              loading="lazy"
+              decoding="async"
+              width="140"
+              height="40"
+              class="h-9 w-auto opacity-50 grayscale transition-all duration-500 group-hover:opacity-100 group-hover:grayscale-0"
+            />
+            <span class="font-body text-xs text-brand-muted text-center leading-tight">
+              {partner.name}
+              <span class="block text-[10px] text-brand-muted/70 mt-1">{t(partner.role)}</span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<script>
+  const initPartners = () => {
+    const gsap = (window as any).gsap;
+    const ScrollTrigger = (window as any).ScrollTrigger;
+    if (!gsap || !ScrollTrigger) return;
+
+    gsap.from('[data-partners-grid] > li', {
+      opacity: 0,
+      y: 30,
+      duration: 0.7,
+      ease: 'power3.out',
+      stagger: 0.08,
+      scrollTrigger: {
+        trigger: '[data-partners-grid]',
+        start: 'top 80%',
+      },
+    });
+  };
+
+  if ((window as any).gsapLoaded) initPartners();
+  else window.addEventListener('gsap:ready', initPartners, { once: true });
+</script>

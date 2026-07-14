@@ -1,0 +1,53 @@
+---
+/**
+ * InteractiveTimeline.astro
+ * ------------------------------------------------------------------
+ * Behaviour-only companion to AboutPhilosophy.astro. AboutPhilosophy renders
+ * the hollow-stroke 01/02/03 numbers + copy; this component attaches the
+ * ScrollTrigger logic that "fills" each number with the accent gold and
+ * brightens its copy block as it enters the viewport.
+ *
+ * Keeping the logic split from markup keeps AboutPhilosophy pure / cheap
+ * to render, and makes the trigger behaviour easy to A/B test.
+ */
+---
+
+<script>
+  const initTimeline = () => {
+    const gsap = (window as any).gsap;
+    const ScrollTrigger = (window as any).ScrollTrigger;
+    if (!gsap || !ScrollTrigger) return;
+
+    const phases = document.querySelectorAll<HTMLElement>('[data-phase]');
+
+    phases.forEach((phase) => {
+      const number = phase.querySelector<HTMLElement>('[data-phase-number]');
+      const body = phase.querySelector<HTMLElement>('[data-phase-body]');
+
+      ScrollTrigger.create({
+        trigger: phase,
+        start: 'top 70%',
+        end: 'bottom 30%',
+        onEnter: () => {
+          number?.classList.add('is-active');
+          if (body) gsap.to(body, { opacity: 1, duration: 0.6 });
+        },
+        onEnterBack: () => {
+          number?.classList.add('is-active');
+          if (body) gsap.to(body, { opacity: 1, duration: 0.6 });
+        },
+        onLeave: () => {
+          // Keep the most-recent phase lit; reset earlier phases when scrolled
+          // fully past. Comment the next two lines to "lock once" behaviour.
+        },
+        onLeaveBack: () => {
+          number?.classList.remove('is-active');
+          if (body) gsap.to(body, { opacity: 0.4, duration: 0.4 });
+        },
+      });
+    });
+  };
+
+  if ((window as any).gsapLoaded) initTimeline();
+  else window.addEventListener('gsap:ready', initTimeline, { once: true });
+</script>
