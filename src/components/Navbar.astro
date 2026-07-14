@@ -19,6 +19,7 @@
  */
 import { siteConfig } from '../data/siteConfig';
 import { t, isRTL } from '../i18n';
+import { anchor } from '../utils/url';
 
 const nav = siteConfig.nav;
 const forwardArrow = isRTL ? '←' : '→';
@@ -50,12 +51,12 @@ const bookLabel = siteConfig.contactSection.requestPitch;
     aria-label="Primary"
   >
     <!-- ── Brand ────────────────────────────────────────────── -->
-    <a
-      href="#hero"
-      class="group inline-flex items-baseline gap-1.5"
-      data-magnetic
-      aria-label={t(siteConfig.agency.name)}
-    >
+<a
+        href={anchor('hero')}
+        class="group inline-flex items-baseline gap-1.5"
+        data-magnetic
+        aria-label={t(siteConfig.agency.name)}
+      >
       <span
         class="relative grid h-9 w-9 place-items-center rounded-full border border-brand-accent/40 text-brand-accent transition-all duration-500 group-hover:bg-brand-accent group-hover:text-brand-bg"
       >
@@ -72,7 +73,7 @@ const bookLabel = siteConfig.contactSection.requestPitch;
       {nav.map((item) => (
         <li>
           <a
-            href={item.href}
+            href={anchor(item.href)}
             data-nav-link
             class="interactive-card group relative px-4 py-2 text-brand-muted transition-colors duration-300 hover:text-brand-text aria-[current=page]:text-brand-text"
             data-magnetic
@@ -89,7 +90,7 @@ const bookLabel = siteConfig.contactSection.requestPitch;
     <!-- ── Right cluster ───────────────────────────────────── -->
     <div class="flex items-center gap-3">
       <a
-        href="#contact"
+        href={anchor('contact')}
         class="interactive-card group hidden sm:inline-flex items-center gap-2 rounded-full border border-brand-accent/30 px-5 py-2.5 text-sm text-brand-accent transition-colors duration-300 hover:bg-brand-accent hover:text-brand-bg hover:border-brand-accent"
         data-magnetic
       >
@@ -140,7 +141,7 @@ const bookLabel = siteConfig.contactSection.requestPitch;
       {nav.map((item, i) => (
         <li class="overflow-hidden">
           <a
-            href={item.href}
+            href={anchor(item.href)}
             data-drawer-link
             style={`--drawer-index: ${i};`}
             class="interactive-card block font-heading text-4xl sm:text-5xl text-brand-text py-3 border-b border-brand-accent/10 transition-colors duration-300 hover:text-brand-accent hover:border-brand-accent/40"
@@ -156,7 +157,7 @@ const bookLabel = siteConfig.contactSection.requestPitch;
 
     <div class="mt-auto pt-12 flex flex-col gap-5" data-drawer-foot>
       <a
-        href="#contact"
+        href={anchor('contact')}
         data-drawer-cta
         class="interactive-card inline-flex items-center justify-center gap-2 rounded-full bg-brand-accent px-6 py-3.5 text-sm font-medium text-brand-bg transition-colors duration-300 hover:bg-brand-accent-hover"
       >
@@ -241,17 +242,19 @@ const bookLabel = siteConfig.contactSection.requestPitch;
     // ---------------------------------------------------------------
     // 2. ACTIVE-SECTION HIGHLIGHTING (IntersectionObserver)
     // ---------------------------------------------------------------
+    // `href` is now base-prefixed (e.g. `/landing-test/#philosophy`), so read
+    // the parsed `a.hash` which always yields the bare `#id` fragment.
     const navLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-nav-link]'));
     const sections = Array.from(navLinks)
       .map((a) => {
-        const id = a.getAttribute('href')?.slice(1);
+        const id = a.hash.replace(/^#/, '');
         return id ? document.getElementById(id) : null;
       })
       .filter((el): el is HTMLElement => Boolean(el));
 
     const setActive = (id: string) => {
       navLinks.forEach((a) => {
-        const match = a.getAttribute('href') === `#${id}`;
+        const match = a.hash.replace(/^#/, '') === id;
         if (match) a.setAttribute('aria-current', 'page');
         else a.removeAttribute('aria-current');
       });

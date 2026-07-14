@@ -11,6 +11,7 @@
  */
 import { siteConfig } from '../data/siteConfig';
 import { t, isRTL } from '../i18n';
+import { asset, anchor } from '../utils/url';
 
 const cta = siteConfig.contactSection;
 // Forward-pointing arrow follows the writing direction.
@@ -44,8 +45,8 @@ const activeLines = isRTL ? headlineLines.ar : headlineLines.en;
       preload="metadata"
       aria-hidden="true"
     >
-      <source src="/hero.webm" type="video/webm" />
-      <source src="/hero.mp4" type="video/mp4" />
+      <source src={asset('hero.webm')} type="video/webm" />
+      <source src={asset('hero.mp4')} type="video/mp4" />
     </video>
     <!-- Always-on fallback gradient ensures no layout shift / flash. -->
     <div
@@ -88,7 +89,7 @@ const activeLines = isRTL ? headlineLines.ar : headlineLines.en;
 
       <div class="mt-10 flex flex-wrap items-center justify-center gap-5">
         <a
-          href="#projects"
+          href={anchor('projects')}
           class="interactive-card group inline-flex items-center gap-3 rounded-full bg-brand-accent px-7 py-3 text-sm font-medium text-brand-bg transition-colors duration-300 hover:bg-brand-accent-hover"
           data-magnetic
         >
@@ -96,7 +97,7 @@ const activeLines = isRTL ? headlineLines.ar : headlineLines.en;
           <span class="transition-transform duration-300 group-hover:translate-x-[4px]">{forwardArrow}</span>
         </a>
         <a
-          href="#philosophy"
+          href={anchor('philosophy')}
           class="interactive-card inline-flex items-center rounded-full border border-brand-accent/30 px-7 py-3 text-sm text-brand-text transition-colors duration-300 hover:border-brand-accent"
           data-magnetic
         >

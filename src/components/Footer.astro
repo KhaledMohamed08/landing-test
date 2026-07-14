@@ -7,6 +7,7 @@
  */
 import { siteConfig } from '../data/siteConfig';
 import { t } from '../i18n';
+import { anchor } from '../utils/url';
 
 const f = siteConfig.footer;
 ---
@@ -24,7 +25,7 @@ const f = siteConfig.footer;
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-16 mb-16">
       <!-- Brand -->
       <div>
-        <a href="#hero" class="font-heading text-2xl tracking-widest text-brand-text">
+        <a href={anchor('hero')} class="font-heading text-2xl tracking-widest text-brand-text">
           {t(siteConfig.agency.name)}<span class="text-brand-accent">.</span>
         </a>
         <p class="mt-4 font-body text-sm text-brand-muted max-w-xs leading-relaxed">
@@ -38,7 +39,7 @@ const f = siteConfig.footer;
         <ul class="space-y-3 font-body text-sm text-brand-muted">
           {siteConfig.nav.map((item) => (
             <li>
-              <a href={item.href} class="interactive-card hover:text-brand-text transition-colors duration-300">
+              <a href={anchor(item.href)} class="interactive-card hover:text-brand-text transition-colors duration-300">
                 {t(item.label)}
               </a>
             </li>

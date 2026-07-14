@@ -4,6 +4,7 @@
  */
 import type { LocalizedString } from '../i18n';
 import { LOCALE } from '../i18n';
+import { asset } from '../utils/url';
 
 export type ProjectStatus = 'completed' | 'ongoing' | 'upcoming';
 
@@ -34,7 +35,7 @@ export const projects: Project[] = [
     title: { en: 'Oasis Dunes', ar: 'كثبان الواحة' },
     location: { en: 'Riyadh — Al Yassmeen', ar: 'الرياض — حي الياسمين' },
     status: 'completed',
-    image: '/projects/project-1.svg',
+    image: asset('projects/project-1.svg'),
     alt: {
       en: 'Architectural façade of the Oasis Dunes project at sunset',
       ar: 'واجهة معمارية لمشروع كثبان الواحة وقت الغروب',
@@ -50,7 +51,7 @@ export const projects: Project[] = [
     title: { en: 'Naseem Tower', ar: 'برج نَسيم' },
     location: { en: 'Jeddah — Al Abhur Corniche', ar: 'جدة — كورنيش الأبحر' },
     status: 'ongoing',
-    image: '/projects/project-2.svg',
+    image: asset('projects/project-2.svg'),
     alt: {
       en: 'A cubic glass tower overlooking the sea',
       ar: 'برج زجاجي مكعب الشكل يطل على البحر',
@@ -66,7 +67,7 @@ export const projects: Project[] = [
     title: { en: 'The Platinum Square', ar: 'المربّع البلاتيني' },
     location: { en: 'Dammam — The Shore', ar: 'الدمام — الشاطئ' },
     status: 'completed',
-    image: '/projects/project-3.svg',
+    image: asset('projects/project-3.svg'),
     alt: {
       en: 'An inner courtyard of a mixed-use complex with golden lighting',
       ar: 'فناء داخلي لمجمع تجاري سكني بإضاءة ذهبية',
@@ -82,7 +83,7 @@ export const projects: Project[] = [
     title: { en: 'The Cut Gem', ar: 'الجوهرة المشذوبة' },
     location: { en: 'Riyadh — Diplomatic Quarter', ar: 'الرياض — حي السفارات' },
     status: 'upcoming',
-    image: '/projects/project-4.svg',
+    image: asset('projects/project-4.svg'),
     alt: {
       en: 'A tower with cut facets resembling precious stones',
       ar: 'برج بزوايا مقطوعة يشبه الأحجار الكريمة',
@@ -98,7 +99,7 @@ export const projects: Project[] = [
     title: { en: 'Valley Arches', ar: 'أقواس الوادي' },
     location: { en: 'Abha — Wadi Al Thi’b', ar: 'أبها — وادي الذئب' },
     status: 'ongoing',
-    image: '/projects/project-5.svg',
+    image: asset('projects/project-5.svg'),
     alt: {
       en: 'A residential complex with curved passages through mountainous terrain',
       ar: 'مجمع سكني بممرات مقوسة وسط تضاريس جبلية',
